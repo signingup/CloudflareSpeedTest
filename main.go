@@ -15,7 +15,6 @@ import (
 
 var (
 	version, versionNew string
-	noUpdateCheck       bool
 )
 
 func init() {
@@ -52,14 +51,10 @@ https://github.com/XIU2/CloudflareSpeedTest
         写入结果文件；如路径含有空格请加上引号；值为空时不写入文件 [-o ""]；(默认 result.csv)
     -dd
         禁用下载测速；禁用后测速结果会按延迟排序 (默认按下载速度排序)；(默认 启用)
-    -ipv6
-        IPv6测速模式；确保 IP 段数据文件内只包含 IPv6 IP段，软件不支持同时测速 IPv4+IPv6；(默认 IPv4)
     -allip
         测速全部的IP；对 IP 段中的每个 IP (仅支持 IPv4) 进行测速；(默认 每个 IP 段随机测速一个 IP)
     -v
         打印程序版本 + 检查版本更新
-    --no-update
-        禁止检查更新
     -h
         打印帮助说明
 `
@@ -73,14 +68,12 @@ https://github.com/XIU2/CloudflareSpeedTest
 	flag.IntVar(&task.TestCount, "dn", 10, "下载测速数量")
 	flag.StringVar(&task.URL, "url", "https://cf.xiu2.xyz/url", "下载测速地址")
 	flag.BoolVar(&task.Disable, "dd", false, "禁用下载测速")
-	flag.BoolVar(&task.IPv6, "ipv6", false, "启用IPv6")
 	flag.BoolVar(&task.TestAll, "allip", false, "测速全部 IP")
 	flag.StringVar(&task.IPFile, "f", "ip.txt", "IP 数据文件")
 	flag.Float64Var(&task.MinSpeed, "sl", 0, "下载速度下限")
 	flag.IntVar(&utils.PrintNum, "p", 10, "显示结果数量")
 	flag.StringVar(&utils.Output, "o", "result.csv", "输出结果文件")
 	flag.BoolVar(&printVersion, "v", false, "打印程序版本")
-	flag.BoolVar(&noUpdateCheck, "no-update", false, "禁止检查更新")
 	flag.Usage = func() { fmt.Print(help) }
 	flag.Parse()
 
@@ -105,11 +98,6 @@ https://github.com/XIU2/CloudflareSpeedTest
 }
 
 func main() {
-
-	if !noUpdateCheck {
-		go checkUpdate() // 检查版本更新
-	}
-
 	task.InitRandSeed() // 置随机数种子
 
 	fmt.Printf("# XIU2/CloudflareSpeedTest %s \n\n", version)
@@ -118,8 +106,8 @@ func main() {
 	pingData := task.NewPing().Run().FilterDelay()
 	// 开始下载测速
 	speedData := task.TestDownloadSpeed(pingData)
-	utils.ExportCsv(speedData)
-	speedData.Print(task.IPv6)
+	utils.ExportCsv(speedData) // 输出文件
+	speedData.Print()          // 打印结果
 
 	if versionNew != "" {
 		fmt.Printf("\n*** 发现新版本 [%s]！请前往 [https://github.com/XIU2/CloudflareSpeedTest] 更新！ ***\n", versionNew)
