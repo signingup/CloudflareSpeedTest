@@ -7,9 +7,10 @@ import (
 	"net"
 	"net/http"
 	"sort"
+	"strconv"
 	"time"
 
-	"CloudflareSpeedTest/utils"
+	"github.com/XIU2/CloudflareSpeedTest/utils"
 
 	"github.com/VividCortex/ewma"
 )
@@ -24,11 +25,8 @@ const (
 )
 
 var (
-	// download test url
-	URL = defaultURL
-	// download timeout
+	URL     = defaultURL
 	Timeout = defaultTimeout
-	// disable download
 	Disable = defaultDisableDownload
 
 	TestCount = defaultTestNum
@@ -67,14 +65,20 @@ func TestDownloadSpeed(ipSet utils.PingDelaySet) (speedSet utils.DownloadSpeedSe
 		TestCount = testNum
 	}
 
-	fmt.Printf("开始下载测速（下载速度下限：%.2f MB/s，下载测速数量：%d，下载测速队列：%d）：\n", MinSpeed, TestCount, testNum)
-	bar := utils.NewBar(TestCount)
+	fmt.Printf("开始下载测速（下限：%.2f MB/s, 数量：%d, 队列：%d）\n", MinSpeed, TestCount, testNum)
+	// 控制 下载测速进度条 与 延迟测速进度条 长度一致（强迫症）
+	bar_a := len(strconv.Itoa(len(ipSet)))
+	bar_b := "     "
+	for i := 0; i < bar_a; i++ {
+		bar_b += " "
+	}
+	bar := utils.NewBar(TestCount, bar_b, "")
 	for i := 0; i < testNum; i++ {
 		speed := downloadHandler(ipSet[i].IP)
 		ipSet[i].DownloadSpeed = speed
 		// 在每个 IP 下载测速后，以 [下载速度下限] 条件过滤结果
 		if speed >= MinSpeed*1024*1024 {
-			bar.Grow(1)
+			bar.Grow(1, "")
 			speedSet = append(speedSet, ipSet[i]) // 高于下载速度下限时，添加到新数组中
 			if len(speedSet) == TestCount {       // 凑够满足条件的 IP 时（下载测速数量 -dn），就跳出循环
 				break
@@ -163,10 +167,15 @@ func downloadHandler(ip *net.IPAddr) float64 {
 		}
 		bufferRead, err := response.Body.Read(buffer)
 		if err != nil {
-			if err != io.EOF { // 文件下载完了，或因网络等问题导致链接中断，则退出循环（终止测速）
+			if err != io.EOF { // 如果文件下载过程中遇到报错（如 Timeout），且并不是因为文件下载完了，则退出循环（终止测速）
+				break
+			} else if contentLength == -1 { // 文件下载完成 且 文件大小未知，则退出循环（终止测速），例如：https://speed.cloudflare.com/__down?bytes=200000000 这样的，如果在 10 秒内就下载完成了，会导致测速结果明显偏低甚至显示为 0.00（下载速度太快时）
 				break
 			}
-			e.Add(float64(contentRead-lastContentRead) / (float64(nextTime.Sub(currentTime)) / float64(timeSlice)))
+			// 获取上个时间片
+			last_time_slice := timeStart.Add(timeSlice * time.Duration(timeCounter-1))
+			// 下载数据量 / (用当前时间 - 上个时间片/ 时间片)
+			e.Add(float64(contentRead-lastContentRead) / (float64(currentTime.Sub(last_time_slice)) / float64(timeSlice)))
 		}
 		contentRead += int64(bufferRead)
 	}
