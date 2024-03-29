@@ -24,7 +24,7 @@
 
 ### 下载运行
 
-1. 下载编译好的可执行文件（ [Github Releases](https://github.com/XIU2/CloudflareSpeedTest/releases) / [蓝奏云](https://pan.lanzouj.com/b0742hkxe) ）并解压。  
+1. 下载编译好的可执行文件（ [Github Releases](https://github.com/XIU2/CloudflareSpeedTest/releases) / [蓝奏云](https://pan.lanpw.com/b0742hkxe) ）并解压。  
 2. 双击运行 `CloudflareST.exe` 文件（Windows 系统），等待测速完成...
 
 <details>
@@ -42,11 +42,13 @@ mkdir CloudflareST
 cd CloudflareST
 
 # 下载 CloudflareST 压缩包（自行根据需求替换 URL 中 [版本号] 和 [文件名]）
-wget -N https://github.com/XIU2/CloudflareSpeedTest/releases/download/v2.2.4/CloudflareST_linux_amd64.tar.gz
-# 如果你是在国内服务器上下载，那么请使用下面这几个镜像加速：
-# wget -N https://download.fgit.ml/XIU2/CloudflareSpeedTest/releases/download/v2.2.4/CloudflareST_linux_amd64.tar.gz
-# wget -N https://download.fgit.gq/XIU2/CloudflareSpeedTest/releases/download/v2.2.4/CloudflareST_linux_amd64.tar.gz
-# wget -N https://ghproxy.com/https://github.com/XIU2/CloudflareSpeedTest/releases/download/v2.2.4/CloudflareST_linux_amd64.tar.gz
+wget -N https://github.com/XIU2/CloudflareSpeedTest/releases/download/v2.2.5/CloudflareST_linux_amd64.tar.gz
+# 如果你是在国内网络环境中下载，那么请使用下面这几个镜像加速之一：
+# wget -N https://download.scholar.rr.nu/XIU2/CloudflareSpeedTest/releases/download/v2.2.5/CloudflareST_linux_amd64.tar.gz
+# wget -N https://ghproxy.cc/https://github.com/XIU2/CloudflareSpeedTest/releases/download/v2.2.5/CloudflareST_linux_amd64.tar.gz
+# wget -N https://ghproxy.net/https://github.com/XIU2/CloudflareSpeedTest/releases/download/v2.2.5/CloudflareST_linux_amd64.tar.gz
+# wget -N https://gh-proxy.com/https://github.com/XIU2/CloudflareSpeedTest/releases/download/v2.2.5/CloudflareST_linux_amd64.tar.gz
+# wget -N https://mirror.ghproxy.com/https://github.com/XIU2/CloudflareSpeedTest/releases/download/v2.2.5/CloudflareST_linux_amd64.tar.gz
 # 如果下载失败的话，尝试删除 -N 参数（如果是为了更新，则记得提前删除旧压缩包 rm CloudflareST_linux_amd64.tar.gz ）
 
 # 解压（不需要删除旧文件，会直接覆盖，自行根据需求替换 文件名）
@@ -101,10 +103,12 @@ IP 地址           已发送  已接收  丢包率  平均延迟  下载速度 
 
 # 软件在 默认参数 下的整个流程大概步骤：
 # 1. 延迟测速（默认 TCPing 模式，HTTPing 模式需要手动加上参数）
-# 2. 延迟排序（延迟从低到高排序并按条件过滤，不同丢包率的会分开独立排序，因此可能会有一些延迟低但丢包的 IP 被排到后面）
+# 2. 延迟排序（延迟 从低到高 排序并按条件过滤，不同丢包率会分开排序，因此可能会有一些延迟低但丢包的 IP 排到后面）
 # 3. 下载测速（从延迟最低的 IP 开始依次下载测速，默认测够 10 个就会停止）
 # 4. 速度排序（速度从高到低排序）
 # 5. 输出结果（通过参数控制是否输出到命令行(-p 0)或输出到文件(-o "")）
+
+# 注意：输出的结果文件 result.csv 通过微软 Excel 表格打开会中文乱码，这是正常的，其他表格软件/记事本都显示正常
 ```
 
 测速结果第一行就是**既下载速度最快、又平均延迟最低的最快 IP**！
